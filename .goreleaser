@@ -6,7 +6,6 @@ before:
     - go generate ./...
 builds:
   - id: annas-mcp
-    binary: annas-mcp
     main: ./cmd/annas-mcp
     ldflags:
       - -extldflags "-static" -s -w -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X main.Version={{.Version}} -X main.Revision={{.ShortCommit}}
@@ -31,7 +30,6 @@ builds:
         goarch: arm
 
   - id: annas-mcp-win
-    binary: annas-mcp
     main: ./cmd/annas-mcp
     ldflags:
       - -extldflags "-static" -s -w -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X main.Version={{.Version}} -X main.Revision={{.ShortCommit}}
