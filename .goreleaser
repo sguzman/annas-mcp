@@ -7,7 +7,7 @@ before:
 builds:
   - id: annas-mcp
     binary: annas-mcp
-    dir: ./cmd/annas-mcp
+    main: ./cmd/annas-mcp
     ldflags:
       - -extldflags "-static" -s -w -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X main.Version={{.Version}} -X main.Revision={{.ShortCommit}}
     env:
@@ -32,7 +32,7 @@ builds:
 
   - id: annas-mcp-win
     binary: annas-mcp
-    dir: ./cmd/annas-mcp
+    main: ./cmd/annas-mcp
     ldflags:
       - -extldflags "-static" -s -w -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser -X main.Version={{.Version}} -X main.Revision={{.ShortCommit}}
     env:
