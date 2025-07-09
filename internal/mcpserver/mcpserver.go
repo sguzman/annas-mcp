@@ -3,10 +3,10 @@ package mcpserver
 import (
 	"context"
 	"errors"
-	"log"
 	"os"
 
 	"github.com/iosifache/annas-mcp/internal/anna"
+	"github.com/iosifache/annas-mcp/internal/logger"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go.uber.org/zap"
 )
@@ -21,24 +21,16 @@ type DownloadParams struct {
 	Format   string `json:"format", mcp:"Book format, for example pdf or epub"`
 }
 
-var logger *zap.Logger
-
-func init() {
-	var err error
-	logger, err = zap.NewProduction()
-	if err != nil {
-		log.Fatalf("Failed to initialize zap logger: %v", err)
-	}
-}
-
 func SearchTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParamsFor[SearchParams]) (*mcp.CallToolResultFor[any], error) {
-	logger.Info("Search command called",
+	l := logger.GetLogger()
+
+	l.Info("Search command called",
 		zap.String("searchTerm", params.Arguments.SearchTerm),
 	)
 
 	books, err := anna.FindBook(params.Arguments.SearchTerm)
 	if err != nil {
-		logger.Error("Search command failed",
+		l.Error("Search command failed",
 			zap.String("searchTerm", params.Arguments.SearchTerm),
 			zap.Error(err),
 		)
@@ -50,7 +42,7 @@ func SearchTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTool
 		bookList += book.String() + "\n\n"
 	}
 
-	logger.Info("Search command completed successfully",
+	l.Info("Search command completed successfully",
 		zap.String("searchTerm", params.Arguments.SearchTerm),
 		zap.Int("resultsCount", len(books)),
 	)
@@ -62,7 +54,9 @@ func SearchTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTool
 }
 
 func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParamsFor[DownloadParams]) (*mcp.CallToolResultFor[any], error) {
-	logger.Info("Download command called",
+	l := logger.GetLogger()
+
+	l.Info("Download command called",
 		zap.String("bookHash", params.Arguments.BookHash),
 		zap.String("title", params.Arguments.Title),
 		zap.String("format", params.Arguments.Format),
@@ -72,7 +66,7 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 	downloadPath := os.Getenv("ANNAS_DOWNLOAD_PATH")
 	if secretKey == "" || downloadPath == "" {
 		err := errors.New("ANNAS_SECRET_KEY and ANNAS_DOWNLOAD_PATH environment variables must be set")
-		logger.Error("Download command failed",
+		l.Error("Download command failed",
 			zap.String("bookHash", params.Arguments.BookHash),
 			zap.Error(err),
 		)
@@ -89,7 +83,7 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 
 	err := book.Download(secretKey, downloadPath)
 	if err != nil {
-		logger.Error("Download command failed",
+		l.Error("Download command failed",
 			zap.String("bookHash", params.Arguments.BookHash),
 			zap.String("downloadPath", downloadPath),
 			zap.Error(err),
@@ -97,7 +91,7 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 		return nil, err
 	}
 
-	logger.Info("Download command completed successfully",
+	l.Info("Download command completed successfully",
 		zap.String("bookHash", params.Arguments.BookHash),
 		zap.String("downloadPath", downloadPath),
 	)
@@ -110,9 +104,10 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 }
 
 func StartServer() {
-	defer logger.Sync()
+	l := logger.GetLogger()
+	defer l.Sync()
 
-	logger.Info("Starting MCP server",
+	l.Info("Starting MCP server",
 		zap.String("name", "annas-mcp"),
 		zap.String("version", "v0.0.1"),
 	)
@@ -130,9 +125,9 @@ func StartServer() {
 		)),
 	)
 
-	logger.Info("MCP server started successfully")
+	l.Info("MCP server started successfully")
 
 	if err := server.Run(context.Background(), mcp.NewStdioTransport()); err != nil {
-		logger.Fatal("MCP server failed", zap.Error(err))
+		l.Fatal("MCP server failed", zap.Error(err))
 	}
 }

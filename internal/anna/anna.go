@@ -14,6 +14,8 @@ import (
 	"path/filepath"
 
 	colly "github.com/gocolly/colly/v2"
+	"github.com/iosifache/annas-mcp/internal/logger"
+	"go.uber.org/zap"
 )
 
 const (
@@ -35,6 +37,8 @@ func extractMetaInformation(meta string) (language, format, size string) {
 }
 
 func FindBook(query string) ([]*Book, error) {
+	l := logger.GetLogger()
+
 	c := colly.NewCollector(
 		colly.Async(true),
 	)
@@ -48,7 +52,7 @@ func FindBook(query string) ([]*Book, error) {
 	})
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL.String())
+		l.Info("Visiting URL", zap.String("url", r.URL.String()))
 	})
 
 	fullURL := fmt.Sprintf(AnnasSearchEndpoint, url.QueryEscape(query))
