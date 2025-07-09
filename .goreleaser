@@ -56,11 +56,9 @@ archives:
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}--checksums.txt"
+
 release:
   draft: false
+
 changelog:
   sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
