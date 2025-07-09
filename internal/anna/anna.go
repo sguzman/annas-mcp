@@ -127,3 +127,17 @@ func (b *Book) Download(secretKey, folderPath string) error {
 	_, err = io.Copy(out, downloadResp.Body)
 	return err
 }
+
+func (b *Book) String() string {
+	return fmt.Sprintf("Title: %s\nAuthors: %s\nPublisher: %s\nLanguage: %s\nFormat: %s\nSize: %s\nURL: %s\nHash: %s",
+		b.Title, b.Authors, b.Publisher, b.Language, b.Format, b.Size, b.URL, b.Hash)
+}
+
+func (b *Book) ToJSON() (string, error) {
+	data, err := json.MarshalIndent(b, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}

@@ -1,14 +1,14 @@
 package anna
 
 type Book struct {
-	Language  string
-	Format    string
-	Size      string
-	Title     string
-	Publisher string
-	Authors   string
-	URL       string
-	Hash      string
+	Language  string `json:"language"`
+	Format    string `json:"format"`
+	Size      string `json:"size"`
+	Title     string `json:"title"`
+	Publisher string `json:"publisher"`
+	Authors   string `json:"authors"`
+	URL       string `json:"url"`
+	Hash      string `json:"hash"`
 }
 
 type fastDownloadResponse struct {
