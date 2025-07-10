@@ -1,2 +1,8 @@
 # Builds
 dist
+
+# MacOS
+**/.DS_Store
+
+# Binaries
+/annas-mcp

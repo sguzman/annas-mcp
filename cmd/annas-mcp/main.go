@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/iosifache/annas-mcp/internal/mcpserver"
+	"github.com/iosifache/annas-mcp/internal/modes"
 )
 
 func main() {
-	mcpserver.StartServer()
+	modes.StartCLI()
 }

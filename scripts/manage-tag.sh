@@ -15,12 +15,12 @@ if [ "$ACTION" != "add" ] && [ "$ACTION" != "delete" ] && [ "$ACTION" != "recrea
     exit 1
 fi
 
-if [ ! -f "version.txt" ]; then
-    echo "Error: version.txt file not found in the root directory"
+if [ ! -f "internal/version/version.txt" ]; then
+    echo "Error: internal/version/version.txt file not found"
     exit 1
 fi
 
-VERSION=$(cat version.txt | tr -d '[:space:]')
+VERSION=$(cat internal/version/version.txt | tr -d '[:space:]')
 
 if [ -z "$VERSION" ]; then
     echo "Error: version.txt is empty"

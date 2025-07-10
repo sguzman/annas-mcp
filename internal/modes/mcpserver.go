@@ -1,25 +1,14 @@
-package mcpserver
+package modes
 
 import (
 	"context"
-	"errors"
-	"os"
 
 	"github.com/iosifache/annas-mcp/internal/anna"
 	"github.com/iosifache/annas-mcp/internal/logger"
+	"github.com/iosifache/annas-mcp/internal/version"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go.uber.org/zap"
 )
-
-type SearchParams struct {
-	SearchTerm string `json:"term", mcp:"Term to search for"`
-}
-
-type DownloadParams struct {
-	BookHash string `json:"hash", mcp:"MD5 hash of the book to download"`
-	Title    string `json:"title", mcp:"Book title, used for filename"`
-	Format   string `json:"format", mcp:"Book format, for example pdf or epub"`
-}
 
 func SearchTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallToolParamsFor[SearchParams]) (*mcp.CallToolResultFor[any], error) {
 	l := logger.GetLogger()
@@ -62,16 +51,13 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 		zap.String("format", params.Arguments.Format),
 	)
 
-	secretKey := os.Getenv("ANNAS_SECRET_KEY")
-	downloadPath := os.Getenv("ANNAS_DOWNLOAD_PATH")
-	if secretKey == "" || downloadPath == "" {
-		err := errors.New("ANNAS_SECRET_KEY and ANNAS_DOWNLOAD_PATH environment variables must be set")
-		l.Error("Download command failed",
-			zap.String("bookHash", params.Arguments.BookHash),
-			zap.Error(err),
-		)
+	env, err := GetEnv()
+	if err != nil {
+		l.Error("Failed to get environment variables", zap.Error(err))
 		return nil, err
 	}
+	secretKey := env.SecretKey
+	downloadPath := env.DownloadPath
 
 	title := params.Arguments.Title
 	format := params.Arguments.Format
@@ -81,7 +67,7 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 		Format: format,
 	}
 
-	err := book.Download(secretKey, downloadPath)
+	err = book.Download(secretKey, downloadPath)
 	if err != nil {
 		l.Error("Download command failed",
 			zap.String("bookHash", params.Arguments.BookHash),
@@ -103,16 +89,17 @@ func DownloadTool(ctx context.Context, cc *mcp.ServerSession, params *mcp.CallTo
 	}, nil
 }
 
-func StartServer() {
+func StartMCPServer() {
 	l := logger.GetLogger()
 	defer l.Sync()
 
+	serverVersion := version.GetVersion()
 	l.Info("Starting MCP server",
 		zap.String("name", "annas-mcp"),
-		zap.String("version", "v0.0.1"),
+		zap.String("version", serverVersion),
 	)
 
-	server := mcp.NewServer("annas-mcp", "v0.0.1", nil)
+	server := mcp.NewServer("annas-mcp", serverVersion, nil)
 
 	server.AddTools(
 		mcp.NewServerTool("search", "Search books", SearchTool, mcp.Input(
