@@ -6,3 +6,4 @@ dist
 
 # Binaries
 /annas-mcp
+/.gomodcache
