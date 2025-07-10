@@ -1,6 +1,6 @@
 module github.com/iosifache/annas-mcp
 
-go 1.23.4
+go 1.23
 
 require (
 	github.com/charmbracelet/fang v0.2.0
